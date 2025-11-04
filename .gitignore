@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.py.class
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+.env
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+env.bak/
+
+# PyCharm
+.idea/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Migrations (optional: keep if you want to exclude them from VCS)
+# */migrations/
+# !*/migrations/__init__.py
+
+# Cache and build
+*.egg-info/
+dist/
+build/
+.cache/
+.pytest_cache/

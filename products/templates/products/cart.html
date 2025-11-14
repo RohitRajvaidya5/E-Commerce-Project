@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+
+<!-- <h1 class="text-2xl font-bold mb-4">Your Cart</h1> -->
+
+{% if products %}
+    <ul>
+        {% for p in products %}
+        <li class="flex justify-between border-b py-2">
+            <span>{{ p.name }} (x{{ p.qty }})</span>
+            <span>₹{{ p.total }}</span>
+            <a class="text-red-600" href="{% url 'remove_from_cart' p.id %}">
+                Remove
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p class="text-xl font-semibold mt-4">Total: ₹{{ total }}</p>
+
+    <a href="{% url 'checkout' %}" 
+       class="bg-blue-600 text-white px-4 py-2 mt-4 inline-block rounded">
+       Checkout
+    </a>
+
+{% else %}
+    <div class="flex flex-col items-center justify-center py-10 h-[64vh]">
+    <img 
+        src="{% static 'products/images/empty_cart.jpg' %}" 
+        alt="Empty Cart" 
+        class="w-40 mb-4"
+    >
+    <p class="text-center text-xl">Your cart is empty.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}

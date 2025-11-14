@@ -1,14 +1,151 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Template</title>
-</head>
-<body>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'products/css/styles.css' %}" />
+    <title>{% block title %}My Shop{% endblock %}</title>
+  </head>
 
-    <h1>Testing Template</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque, illum ab praesentium numquam excepturi veniam alias ea mollitia corporis labore ex, accusamus nemo dolores incidunt, soluta aut? Optio, molestiae expedita!</p>
-    
-</body>
+  <body class="bg-gray-50 text-gray-800 min-h-screen">
+    <!-- NAVBAR -->
+    <header class="navbar bg-white shadow-sm px-4 md:px-8 sticky top-0 z-50">
+      <div class="flex-1">
+        <a href="/" class="text-2xl font-semibold text-blue-600"
+          >E-Commerce Site</a
+        >
+      </div>
+
+      <!-- Center Links -->
+      <div class="hidden md:flex">
+        <ul
+          class="menu menu-horizontal px-10 text-left text-[16px] font-medium text-gray-700"
+        >
+          <!--          <li><a href="/" class="hover:text-blue-600">Home</a></li>-->
+          <!--          <li><a href="/products/" class="hover:text-blue-600">Products</a></li>-->
+          <!-- <li><a href="/blogs/" class="hover:text-blue-600">Blogs</a></li>
+          <li><a href="/track/" class="hover:text-blue-600">Track Order</a></li>
+          <li><a href="/contact/" class="hover:text-blue-600">Get In Touch</a></li> -->
+        </ul>
+      </div>
+
+      <!-- Right section -->
+      <div class="flex items-center gap-3">
+        <!-- Search -->
+        <div class="hidden md:flex items-center">
+          <input
+            type="text"
+            placeholder="Search..."
+            class="input input-bordered input-sm w-36 md:w-48"
+          />
+        </div>
+
+        <!-- Cart -->
+        <a href="{% url 'cart' %}" class="btn btn-ghost btn-circle">
+          <div class="indicator">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-gray-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7.5M7 13l1.5 7.5M10 21a1 1 0 11-2 0 1 1 0 012 0zm8 0a1 1 0 11-2 0 1 1 0 012 0z"
+              />
+            </svg>
+            <span class="badge badge-sm indicator-item bg-blue-600 text-white">
+              {{ cart_items }}
+            </span>
+          </div>
+        </a>
+
+        <!-- Toggle Dark and Light Mode-->
+
+          <div> <input type="checkbox" checked="checked" class="toggle" /></div>
+
+
+
+        <!-- Profile Dropdown -->
+        <div class="dropdown dropdown-end">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-circle avatar"
+          >
+            <div class="w-10 rounded-full">
+              <img
+                alt="Profile"
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+              />
+            </div>
+          </div>
+          <ul
+            tabindex="-1"
+            class="menu menu-sm dropdown-content bg-white border border-gray-100 rounded-box mt-3 w-52 p-2 shadow-md"
+          >
+            <li><a href="/profile/">Profile</a></li>
+            <li><a href="/settings/">Settings</a></li>
+            <li><a href="/logout/">Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="dropdown dropdown-end md:hidden">
+          <label tabindex="0" class="btn btn-ghost btn-circle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-gray-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </label>
+          <ul
+            tabindex="0"
+            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52 border border-gray-100"
+          >
+            <!--            <li><a href="/">Home</a></li>-->
+            <!--            <li><a href="/products/">Products</a></li>-->
+            <!-- <li><a href="/blogs/">Blogs</a></li>
+            <li><a href="/track/">Track Order</a></li>
+            <li><a href="/contact/">Get In Touch</a></li> -->
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="p-6">{% block content %} {% endblock %}</main>
+
+    <!-- FOOTER -->
+    <footer
+      class="footer bg-gray-100 text-gray-700 p-6 mt-12 border-t border-gray-200"
+    >
+      <aside>
+        <p>© 2025 MyShop — All rights reserved.</p>
+      </aside>
+      <nav class="flex gap-4">
+        <a class="link link-hover text-blue-600">Privacy Policy</a>
+        <a class="link link-hover text-blue-600">Terms of Use</a>
+      </nav>
+    </footer>
+  </body>
 </html>

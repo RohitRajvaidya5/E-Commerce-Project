@@ -1,0 +1,23 @@
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">Checkout</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <label>
+        <input class="border p-2 w-full" type="text" name="name" placeholder="Full Name">
+    </label>
+    <label>
+        <input class="border p-2 w-full mt-2" type="text" name="phone" placeholder="Phone Number">
+    </label>
+    <label>
+        <textarea class="border p-2 w-full mt-2" name="address" placeholder="Address"></textarea>
+    </label>
+
+    <button class="bg-green-600 text-white px-4 py-2 rounded mt-4">
+        Place Order
+    </button>
+</form>
+
+{% endblock %}

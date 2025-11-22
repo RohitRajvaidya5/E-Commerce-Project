@@ -4,8 +4,23 @@
 {% block title %}Products{% endblock %}
 
 {% block content %}
-
+ 
 {% if products %}
+<div
+  class="hero h-64 rounded-lg overflow-hidden"
+  style="background-image: url(https://images.unsplash.com/photo-1611117775350-ac3950990985?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);"
+>
+  <div class="hero-overlay rounded-lg"></div>
+  <div class="hero-content text-neutral-content text-center rounded-lg">
+    <div class="max-w-md rounded-lg ">
+      <h1 class="mb-1 text-4xl font-bold">Welcome, Let's Shop</h1>
+      <!-- <h1 class="mb-1 text-5xl font-bold">Hello there</h1>
+      <p class="mb-1">quasi. In deleniti eaque aut repudiandae et a id nisi.</p>
+      <button class="btn btn-primary">Get Started</button> -->
+    </div>
+  </div>
+</div>
+
 <div class="max-w-7xl mx-auto px-6 py-12">
 
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -46,14 +61,14 @@
         </div>
 
         <!-- BUTTON -->
-        <div class="mt-5">
+        <!-- <div class="mt-5">
           <a
             href="{% url 'add_to_cart' product.id %}"
             class="w-full block text-center bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition"
           >
             Add to Cart
           </a>
-        </div>
+        </div> -->
 
       </div>
     </div>

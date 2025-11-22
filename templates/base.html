@@ -4,55 +4,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'products/css/styles.css' %}" />
+
+    <!-- DaisyUI v5 + Themes -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" />
+
+    <!-- Tailwind v4 Browser -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- DaisyUI Core -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" />
+
+    <!-- Google Font (presentation only) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Small visual polish (no behavior changes) -->
+    <style>
+      :root { --content-max: 1100px; }
+      html, body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+      .container-max { max-width: var(--content-max); }
+      /* Smooth transitions for interactive elements */
+      .btn, .input, .link { transition: all .12s ease-in-out; }
+      header.navbar { backdrop-filter: blur(6px); }
+      .brand-gradient { background: linear-gradient(90deg,#7c3aed,#06b6d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      main > .container-inner { padding-top: 8px; padding-bottom: 24px; }
+      footer.footer { border-top: 1px solid rgba(0,0,0,0.06); }
+      @media (min-width:768px){
+        .search-input { width: 18rem; }
+      }
+
+      /* Suggestions styling */
+      #search-suggestions { max-height: 260px; overflow-y: auto; }
+      /* Active suggestion uses brand tint */
+      #search-suggestions li.active { background-color: rgba(124,58,237,0.08); color: #5b21b6; }
+      /* Ensure input has room for button */
+      .search-input.pr-10 { padding-right: 2.5rem; }
+
+      /* Dark mode: force white text for readability */
+      html[data-theme="dark"] { color: #ffffff; }
+      html[data-theme="dark"] body,
+      html[data-theme="dark"] p,
+      html[data-theme="dark"] span,
+      html[data-theme="dark"] a,
+      html[data-theme="dark"] li,
+      html[data-theme="dark"] label,
+      html[data-theme="dark"] h1,
+      html[data-theme="dark"] h2,
+      html[data-theme="dark"] h3,
+      html[data-theme="dark"] h4,
+      html[data-theme="dark"] h5,
+      html[data-theme="dark"] h6,
+      html[data-theme="dark"] small,
+      html[data-theme="dark"] .text-sm,
+      html[data-theme="dark"] .text-gray-700,
+      html[data-theme="dark"] .text-gray-600 {
+        color: #ffffff !important;
+      }
+    </style>
+
     <title>{% block title %}My Shop{% endblock %}</title>
   </head>
 
-  <body class="bg-gray-50 text-gray-800 min-h-screen">
+  <body class="bg-base-200 text-base-content min-h-screen">
     <!-- NAVBAR -->
-    <header class="navbar bg-white shadow-sm px-4 md:px-8 sticky top-0 z-50">
+    <header class="navbar bg-base-100 shadow-sm px-4 md:px-8 sticky top-0 z-50">
       <div class="flex-1">
-        <a href="/" class="text-2xl font-semibold text-blue-600"
-          >E-Commerce Site</a
-        >
+        <a href="/" class="text-2xl font-semibold brand-gradient">Printora</a>
       </div>
 
-      <!-- Center Links -->
+      <!-- Middle Links -->
       <div class="hidden md:flex">
-        <ul
-          class="menu menu-horizontal px-10 text-left text-[16px] font-medium text-gray-700"
-        >
-          <!--          <li><a href="/" class="hover:text-blue-600">Home</a></li>-->
-          <!--          <li><a href="/products/" class="hover:text-blue-600">Products</a></li>-->
-          <!-- <li><a href="/blogs/" class="hover:text-blue-600">Blogs</a></li>
-          <li><a href="/track/" class="hover:text-blue-600">Track Order</a></li>
-          <li><a href="/contact/" class="hover:text-blue-600">Get In Touch</a></li> -->
+        <ul class="menu menu-horizontal px-10 text-[16px] font-medium">
+          <!-- Add links if needed -->
         </ul>
       </div>
 
       <!-- Right section -->
       <div class="flex items-center gap-3">
-        <!-- Search -->
-        <div class="hidden md:flex items-center">
-          <input
-            type="text"
-            placeholder="Search..."
-            class="input input-bordered input-sm w-36 md:w-48"
-          />
-        </div>
+        <form action="{% url 'search' %}" method="GET" class="flex items-center">
+  <div class="relative flex items-center">
+    <input
+      id="search-input"
+      type="text"
+      name="q"
+      placeholder="Search products..."
+      class="input input-bordered input-sm search-input pr-3"
+      value="{{ request.GET.q }}"
+      autocomplete="off"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-controls="search-suggestions"
+      aria-expanded="false"
+    />
+    <button type="submit" class="ml-2 btn btn-square btn-sm" aria-label="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+      </svg>
+    </button>
+
+    <!-- Suggestions box (populated by existing script) -->
+    <ul id="search-suggestions" role="listbox" aria-label="Search suggestions" class="hidden absolute left-0 right-0 mt-2 z-50 bg-base-100 rounded-box shadow p-1 overflow-hidden"></ul>
+  </div>
+</form>
+
 
         <!-- Cart -->
         <a href="{% url 'cart' %}" class="btn btn-ghost btn-circle">
           <div class="indicator">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 text-gray-700"
+              class="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -64,25 +124,19 @@
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7.5M7 13l1.5 7.5M10 21a1 1 0 11-2 0 1 1 0 012 0zm8 0a1 1 0 11-2 0 1 1 0 012 0z"
               />
             </svg>
-            <span class="badge badge-sm indicator-item bg-blue-600 text-white">
-              {{ cart_items }}
-            </span>
+            <span class="badge badge-sm indicator-item" id="cart-badge">{{ cart_items }}</span>
           </div>
         </a>
 
-        <!-- Toggle Dark and Light Mode-->
-
-          <div> <input type="checkbox" checked="checked" class="toggle" /></div>
-
-
+        <!-- Theme Toggle -->
+        <label class="swap swap-rotate mr-4">
+          <input type="checkbox" id="theme-toggle" class="toggle" />
+        </label>
+        
 
         <!-- Profile Dropdown -->
         <div class="dropdown dropdown-end">
-          <div
-            tabindex="0"
-            role="button"
-            class="btn btn-ghost btn-circle avatar"
-          >
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
               <img
                 alt="Profile"
@@ -92,7 +146,7 @@
           </div>
           <ul
             tabindex="-1"
-            class="menu menu-sm dropdown-content bg-white border border-gray-100 rounded-box mt-3 w-52 p-2 shadow-md"
+            class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow"
           >
             <li><a href="/profile/">Profile</a></li>
             <li><a href="/settings/">Settings</a></li>
@@ -100,12 +154,12 @@
           </ul>
         </div>
 
-        <!-- Mobile Menu Button -->
+        <!-- Mobile Menu -->
         <div class="dropdown dropdown-end md:hidden">
           <label tabindex="0" class="btn btn-ghost btn-circle">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 text-gray-700"
+              class="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -120,32 +174,197 @@
           </label>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52 border border-gray-100"
+            class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <!--            <li><a href="/">Home</a></li>-->
-            <!--            <li><a href="/products/">Products</a></li>-->
-            <!-- <li><a href="/blogs/">Blogs</a></li>
-            <li><a href="/track/">Track Order</a></li>
-            <li><a href="/contact/">Get In Touch</a></li> -->
+            <!-- Mobile links -->
           </ul>
         </div>
       </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="p-6">{% block content %} {% endblock %}</main>
+    <!-- Page Content -->
+    <main class="p-6">
+      <div class="mx-auto container-max container-inner">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
 
-    <!-- FOOTER -->
-    <footer
-      class="footer bg-gray-100 text-gray-700 p-6 mt-12 border-t border-gray-200"
-    >
-      <aside>
-        <p>© 2025 MyShop — All rights reserved.</p>
-      </aside>
-      <nav class="flex gap-4">
-        <a class="link link-hover text-blue-600">Privacy Policy</a>
-        <a class="link link-hover text-blue-600">Terms of Use</a>
-      </nav>
+    <!-- Footer -->
+    <footer class="footer bg-base-300 p-6 mt-12">
+      <div class="w-full container-max mx-auto flex flex-col md:flex-row md:justify-between items-start gap-4">
+        <div>
+          <p class="font-semibold">Printora</p>
+          <p class="text-sm mt-1">© 2025 MyShop — All rights reserved.</p>
+        </div>
+
+        <nav class="flex gap-4">
+          <a class="link link-hover">Privacy Policy</a>
+          <a class="link link-hover">Terms of Use</a>
+        </nav>
+      </div>
     </footer>
+
+    <!-- Theme Toggle Script -->
+   <script>
+  const toggle = document.getElementById("theme-toggle");
+  const html = document.documentElement;
+
+  const saved = localStorage.getItem("theme");
+  if (saved) {
+    html.setAttribute("data-theme", saved);
+
+    // Checked should represent DARK mode
+    toggle.checked = saved === "dark";
+  }
+
+  toggle.addEventListener("change", () => {
+    // Checked → dark, Unchecked → light
+    const theme = toggle.checked ? "dark" : "light";
+
+    html.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  });
+</script>
+
+<script>
+const input = document.getElementById("search-input");
+const box = document.getElementById("search-suggestions");
+
+let selectedIndex = -1;
+
+function debounce(fn, wait) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+async function fetchSuggestions(query) {
+  if (!query) {
+    box.classList.add('hidden');
+    box.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false');
+    selectedIndex = -1;
+    return;
+  }
+
+  try {
+    const response = await fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+
+    if (!data.results.length) {
+      box.classList.add('hidden');
+      input.setAttribute('aria-expanded', 'false');
+      return;
+    }
+
+    box.innerHTML = data.results
+      .map((p, i) => `
+        <li id="search-suggestion-${i}" data-index="${i}" role="option">
+          <a href="${p.url}" class="block px-3 py-2 rounded">${p.name}</a>
+        </li>
+      `).join('');
+
+    selectedIndex = -1;
+    input.setAttribute('aria-expanded', 'true');
+    box.classList.remove('hidden');
+
+    // attach mouse handlers
+    box.querySelectorAll('li').forEach(li => {
+      li.addEventListener('mouseenter', () => {
+        clearActive();
+        li.classList.add('active');
+        selectedIndex = Number(li.dataset.index);
+        input.setAttribute('aria-activedescendant', li.id);
+      });
+      li.addEventListener('mouseleave', () => {
+        li.classList.remove('active');
+        selectedIndex = -1;
+        input.removeAttribute('aria-activedescendant');
+      });
+    });
+  } catch (err) {
+    console.error('Suggestion fetch error', err);
+  }
+}
+
+const debouncedFetch = debounce((q) => fetchSuggestions(q), 180);
+
+input.addEventListener('input', (e) => {
+  const q = input.value.trim();
+  debouncedFetch(q);
+});
+
+function clearActive() {
+  box.querySelectorAll('li.active').forEach(n => n.classList.remove('active'));
+}
+
+function setActive(index) {
+  clearActive();
+  const node = box.querySelector(`li[data-index="${index}"]`);
+  if (node) {
+    node.classList.add('active');
+    node.scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', node.id);
+  } else {
+    input.removeAttribute('aria-activedescendant');
+  }
+}
+
+input.addEventListener('keydown', (e) => {
+  const items = box.querySelectorAll('li');
+  if (!items.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    setActive(selectedIndex);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedIndex = Math.max(selectedIndex - 1, 0);
+    setActive(selectedIndex);
+  } else if (e.key === 'Enter') {
+    if (selectedIndex >= 0) {
+      e.preventDefault();
+      const node = box.querySelector(`li[data-index="${selectedIndex}"] a`);
+      if (node) window.location.href = node.href;
+    }
+    // otherwise allow form to submit normally
+  } else if (e.key === 'Escape') {
+    box.classList.add('hidden');
+    selectedIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  }
+});
+
+// Hide suggestions when clicking outside
+document.addEventListener("click", (e) => {
+  if (!box.contains(e.target) && e.target !== input) {
+    box.classList.add("hidden");
+    selectedIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  }
+});
+
+// Listen for cart updates from other pages/tabs
+window.addEventListener('cartUpdated', (e) => {
+  const badge = document.getElementById('cart-badge');
+  if (badge) {
+    // Get current badge value and add/subtract the delta
+    const currentTotal = parseInt(badge.innerText) || 0;
+    const oldQty = e.detail.oldQty || 0;
+    const newQty = e.detail.qty || 0;
+    const delta = newQty - oldQty;
+    const updatedTotal = Math.max(0, currentTotal + delta);
+    badge.innerText = updatedTotal;
+  }
+});
+
+</script>
+
+
   </body>
 </html>

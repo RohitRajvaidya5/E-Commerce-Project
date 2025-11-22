@@ -21,7 +21,7 @@
                     <div class="md:col-span-2">
             <img
                 src="{{ product.image.url }}"
-                class="w-full h-80 object-cover rounded-lg shadow"
+                class="w-full h-80 object-contain rounded-lg shadow"
             />
         </div>
             </div>
@@ -57,18 +57,11 @@
             <!-- Buttons -->
             <div class="space-y-3 pt-4">
 
-                <button class="w-full bg-black text-white py-3 rounded-lg">
-                    <a href="{% url 'add_to_cart' product.id %}">Add To Cart</a>
+                <button id="add-to-cart-btn" class="cursor-pointer w-full bg-black text-white py-3 rounded-lg" type="button" onclick="addToCartAjax({{ product.id }})">
+                    Add To Cart
                 </button>
 
-                <button class="w-full border py-3 rounded-lg">
-                    <a href="{% url 'add_to_cart' product.id %}">
-                        <a href="{% url 'cart' %}">
-                            Buy Now
-                        </a>
-                    </a>
-                    
-                </button>
+                <a href="{% url 'cart' %}" class="w-full block text-center border py-3 rounded-lg">Go To Cart</a>
             </div>
 
             <div class="pt-3 space-y-1 text-sm">
@@ -111,5 +104,63 @@
 <!--    </div>-->
 
 </div>
+
+<script>
+async function addToCartAjax(productId) {
+    const btn = document.getElementById('add-to-cart-btn');
+    if (!btn) return;
+    const orig = btn.innerText;
+    try {
+        btn.disabled = true;
+        btn.innerText = 'Adding...';
+
+        const resp = await fetch(`/add/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+
+        if (resp.ok) {
+            // increment navbar badge if present
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                const cur = parseInt(badge.innerText) || 0;
+                badge.innerText = cur + 1;
+            }
+
+            btn.innerText = '✓ Added';
+            btn.classList.remove('bg-black');
+            btn.classList.add('bg-green-600');
+            setTimeout(() => {
+                btn.innerText = orig;
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-black');
+                btn.disabled = false;
+            }, 1800);
+        } else {
+            btn.innerText = 'Error';
+            setTimeout(() => { btn.innerText = orig; btn.disabled = false; }, 1500);
+        }
+    } catch (err) {
+        console.error(err);
+        btn.innerText = 'Error';
+        setTimeout(() => { btn.innerText = orig; btn.disabled = false; }, 1500);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + '=') {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 
 {% endblock content %}

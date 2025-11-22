@@ -6,38 +6,134 @@
 
 {% block content %}
 
-<!-- <h1 class="text-2xl font-bold mb-4">Your Cart</h1> -->
+<style>
+  /* Ensure product name is white in dark theme without changing other files */
+  html[data-theme="dark"] .cart-item-name { color: #ffffff !important; }
+</style>
 
 {% if products %}
-    <ul>
+    <div class="space-y-4">
+      <ul class="divide-y rounded-lg overflow-hidden bg-base-100 shadow-sm">
         {% for p in products %}
-        <li class="flex justify-between border-b py-2">
-            <span>{{ p.name }} (x{{ p.qty }})</span>
-            <span>₹{{ p.total }}</span>
-            <a class="text-red-600" href="{% url 'remove_from_cart' p.id %}">
-                Remove
-            </a>
+        <li class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-4">
+                {% if p.image %}
+                  <img src="{{ p.image.url }}" alt="{{ p.name }}" class="w-16 h-16 object-cover rounded-md shadow-sm bg-gray-50">
+                {% else %}
+                  <img src="{% static 'products/images/empty_cart.jpg' %}" alt="{{ p.name }}" class="w-16 h-16 object-cover rounded-md shadow-sm bg-gray-50">
+                {% endif %}
+                <div>
+                    <div class="font-medium text-gray-900 cart-item-name">{{ p.name }}</div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <button class="btn btn-outline btn-xs" onclick="updateQuantity({{ p.id }}, -1)">-</button>
+                        <span class="text-sm font-medium w-8 text-center" id="qty-{{ p.id }}">{{ p.qty }}</span>
+                        <button class="btn btn-outline btn-xs" onclick="updateQuantity({{ p.id }}, 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <div class="text-xs text-gray-500">Unit price</div>
+                    <div class="font-semibold">₹{{ p.price }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Total: <span id="total-{{ p.id }}" class="font-bold text-gray-900">₹{{ p.total }}</span></div>
+                </div>
+                <a class="text-error hover:underline text-sm" href="{% url 'remove_from_cart' p.id %}">Remove</a>
+            </div>
         </li>
         {% endfor %}
-    </ul>
+      </ul>
 
-    <p class="text-xl font-semibold mt-4">Total: ₹{{ total }}</p>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <p class="text-xl font-semibold">Total: <span class="text-primary" id="grand-total">₹{{ total }}</span></p>
 
-    <a href="{% url 'checkout' %}" 
-       class="bg-blue-600 text-white px-4 py-2 mt-4 inline-block rounded">
-       Checkout
-    </a>
+        <div class="flex gap-3">
+          <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+          <a href="{% url 'products' %}" class="btn btn-ghost">Continue Shopping</a>
+        </div>
+      </div>
+    </div>
 
 {% else %}
     <div class="flex flex-col items-center justify-center py-10 h-[64vh]">
-    <img 
+      <img 
         src="{% static 'products/images/empty_cart.jpg' %}" 
         alt="Empty Cart" 
-        class="w-40 mb-4"
-    >
-    <p class="text-center text-xl">Your cart is empty.</p>
-</div>
+        class="w-48 mb-6 rounded-lg shadow-sm"
+      >
+      <p class="text-center text-xl text-gray-600 mb-4">Your cart is empty.</p>
+      <a href="{% url 'products' %}" class="btn btn-primary">Start Shopping</a>
+    </div>
 
 {% endif %}
+
+<script>
+async function updateQuantity(productId, delta) {
+  const qtySpan = document.getElementById(`qty-${productId}`);
+  const totalSpan = document.getElementById(`total-${productId}`);
+  
+  if (!qtySpan || !totalSpan) return;
+  
+  const currentQty = parseInt(qtySpan.innerText);
+  const newQty = Math.max(1, currentQty + delta);
+  
+  if (newQty === currentQty) return; // no change
+  
+  const oldQty = currentQty; // Store old qty for badge update
+  
+  try {
+    const resp = await fetch(`/update-cart-quantity/${productId}/${newQty}/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    });
+    
+    if (resp.ok) {
+      const data = await resp.json();
+      // Update UI smoothly without reload
+      qtySpan.innerText = data.qty;
+      totalSpan.innerText = `₹${data.total}`;
+      
+      // Update grand total by recalculating all item totals
+      updateGrandTotal();
+      
+      // Dispatch event to update cart badge in navbar
+      window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { productId, oldQty, qty: data.qty } }));
+    } else {
+      console.error('Failed to update quantity');
+    }
+  } catch (err) {
+    console.error('Update failed:', err);
+  }
+}
+
+function updateGrandTotal() {
+  let grandTotal = 0;
+  // Sum all individual item totals
+  document.querySelectorAll('[id^="total-"]').forEach(span => {
+    const priceStr = span.innerText.replace('₹', '').trim();
+    grandTotal += parseFloat(priceStr) || 0;
+  });
+  
+  const grandTotalSpan = document.getElementById('grand-total');
+  if (grandTotalSpan) {
+    grandTotalSpan.innerText = `₹${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + '=') {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
 
 {% endblock %}

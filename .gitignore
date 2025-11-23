@@ -22,6 +22,8 @@ ENV/
 .env/
 env.bak/
 
+.env
+
 # PyCharm
 .idea/
 *.iml

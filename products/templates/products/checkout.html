@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Checkout</h1>
+    <p class="text-gray-600">Complete your order by entering your details below</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <!-- Left Section -->
+    <div class="md:col-span-2">
+      <div class="bg-base-100 rounded-xl shadow-sm p-6 md:p-8 mb-6">
+
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm font-semibold">1</span>
+          Delivery Information
+        </h2>
+
+        <!-- Correct form ID -->
+        <form method="post" id="checkout-form" class="space-y-5">
+          {% csrf_token %}
+
+          <!-- NAME -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value="{{ name }}"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              placeholder="John Doe"
+              required
+            />
+          </div>
+
+          <!-- PHONE -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              value="{{ phone }}"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              placeholder="+91 98765 43210"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+            
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value="{{ email }}"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              placeholder="email@email.com"
+              required
+            />
+          </div>
+
+          <!-- ADDRESS -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Address</label>
+            <textarea
+              id="address"
+              name="address"
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none"
+              placeholder="Enter your full delivery address..."
+              required
+            >{{ address }}</textarea>
+            <p class="text-xs text-gray-500 mt-1">Include house number, street, city, and postal code</p>
+          </div>
+
+          <!-- PAYMENT -->
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm font-semibold">2</span>
+              Payment Method
+            </h3>
+
+            {% if payment %}
+            <button id="rzp-button" type="button" class="w-full btn btn-primary py-3 text-lg font-semibold">
+              Pay ₹{{ total }}
+            </button>
+
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+            {% else %}
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p class="text-gray-600 text-sm">Enter your details and click "Proceed to Payment" to generate payment order.</p>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if not payment %}
+          <div class="mt-8">
+            <button
+              type="submit"
+              name="create_payment"
+              class="w-full btn btn-primary py-3 text-lg font-semibold"
+            >
+              Proceed to Payment
+            </button>
+          </div>
+          {% endif %}
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="md:col-span-1">
+      <div class="bg-base-100 rounded-xl shadow-sm p-6 sticky top-24">
+
+        <h3 class="text-lg font-bold mb-4">Order Summary</h3>
+
+        <div class="space-y-3 pb-4 border-b border-gray-200">
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="font-semibold">₹{{ subtotal }}</span>
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Shipping</span>
+            <span class="font-semibold text-green-600">
+              {% if shipping == 0 %}Free{% else %}₹{{ shipping }}{% endif %}
+            </span>
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tax</span>
+            <span class="font-semibold">₹{{ tax }}</span>
+          </div>
+
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+          <span class="text-lg font-bold">Total</span>
+          <span class="text-2xl font-bold text-primary">₹{{ total }}</span>
+        </div>
+
+        <a href="{% url 'cart' %}" class="w-full mt-6 btn btn-ghost gap-2">← Back to Cart</a>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if payment %}
+<script>
+
+  var options = {
+      "key": "{{ payment.key_id }}",
+      "amount": "{{ payment.amount }}",
+      "currency": "{{ payment.currency }}",
+      "name": "Your Store",
+      "order_id": "{{ payment.order_id }}",
+
+      "handler": function (response) {
+
+          let form = document.getElementById("checkout-form");
+
+          // Add Razorpay data
+          let fields = {
+              "razorpay_payment_id": response.razorpay_payment_id,
+              "razorpay_order_id": response.razorpay_order_id,
+              "razorpay_signature": response.razorpay_signature,
+              "place_order": "1"
+          };
+
+          for (let key in fields) {
+              let input = document.createElement("input");
+              input.type = "hidden";
+              input.name = key;
+              input.value = fields[key];
+              form.appendChild(input);
+          }
+
+          form.submit();
+      },
+
+      "theme": {"color": "#0D6EFD"}
+  };
+
+  var rzp1 = new Razorpay(options);
+
+  document.getElementById('rzp-button').onclick = function(e){
+      rzp1.open();
+      e.preventDefault();
+  }
+
+</script>
+{% endif %}
+
+{% endblock %}

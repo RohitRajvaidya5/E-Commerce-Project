@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-lg mx-auto mt-10 bg-base-100 text-base-content p-6 shadow rounded-xl">
+
+  <h2 class="text-xl font-semibold mb-4">Edit Profile</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Phone -->
+    <label class="block font-medium mb-1">Phone Number</label>
+    <input 
+      type="text" 
+      name="phone" 
+      value="{{ profile.phone }}" 
+      class="input input-bordered w-full mb-4"
+    >
+
+    <!-- Address -->
+    <label class="block font-medium mb-1">Address</label>
+    <textarea 
+      name="address" 
+      class="textarea textarea-bordered w-full mb-4"
+    >{{ profile.address }}</textarea>
+
+    <!-- Profile Photo -->
+    <label class="block font-medium mb-1">Profile Photo</label>
+
+    {% if profile.profile_photo %}
+    <div class="flex justify-center mb-4">
+      <img 
+        src="{{ profile.profile_photo.url }}" 
+        class="w-28 h-28 rounded-full object-cover border border-base-300 shadow-md"
+      >
+    </div>
+    {% endif %}
+
+    <input 
+      type="file" 
+      name="profile_photo" 
+      class="file-input file-input-bordered w-full mb-4"
+    >
+
+    <!-- Submit -->
+    <button class="btn btn-primary w-full">Save Changes</button>
+
+  </form>
+
+</div>
+
+{% endblock %}

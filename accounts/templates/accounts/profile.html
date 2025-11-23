@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-xl mx-auto bg-base-100 text-base-content p-6 rounded-xl shadow">
+
+  <h2 class="text-2xl font-bold mb-4">My Profile</h2>
+
+  <!-- Profile Photo -->
+  {% if profile.profile_photo %}
+  <div class="mt-4 flex justify-center">
+    <img 
+      src="{{ profile.profile_photo.url }}" 
+      class="w-36 h-36 rounded-full border-2 border-base-300 shadow-lg object-cover"
+    >
+  </div>
+  {% endif %}
+
+  <!-- Profile Info -->
+  <div class="mt-6 space-y-3 text-lg">
+    <p><strong>Username:</strong> {{ profile.user.username }}</p>
+    <p><strong>Phone:</strong> {{ profile.phone|default:"Not added" }}</p>
+    <p><strong>Address:</strong> {{ profile.address|default:"Not added" }}</p>
+  </div>
+
+  <!-- Edit Button -->
+  <a href="{% url 'edit_profile' %}" class="btn btn-primary w-full mt-6">
+    Edit Profile
+  </a>
+
+</div>
+
+{% endblock %}

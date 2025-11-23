@@ -2,7 +2,6 @@ from pathlib import Path
 from django.contrib.messages import constants as messages
 import os
 from dotenv import load_dotenv
-import dj_database_url
 
 load_dotenv()
 
@@ -13,9 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['e-commerce-project-yb1q.onrender.com', 'localhost']
+ALLOWED_HOSTS = [
+    'rohitrajvaidya25.pythonanywhere.com',
+    'localhost',
+]
 
 # ---------------------------------------------------------
 # APPLICATIONS
@@ -68,12 +70,12 @@ WSGI_APPLICATION = "ecom_project.wsgi.application"
 # ---------------------------------------------------------
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
+
 
 # ---------------------------------------------------------
 # PASSWORD VALIDATION

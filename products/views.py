@@ -225,7 +225,7 @@ def checkout(request):
         send_order_email(
             to_email=email,
             subject="Order Confirmation",
-            message=f"Thank you {name}! Your order ID is {order.id}\nPayment: {order.payment_status}"
+            message=f"Thank you {name}! Your order ID is {order.id}\nPayment Amount : {order.total_price}\nPayment Status: {order.payment_status}"
         )
 
         # Empty cart

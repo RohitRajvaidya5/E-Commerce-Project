@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 from dotenv import load_dotenv
+import dj_database_url
 
 # Load environment variables
 load_dotenv()
@@ -13,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
+MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")  # optional for manual migration endpoint
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -69,24 +70,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "ecom_project.wsgi.application"
 
 # ---------------------------------------------------------
-# DATABASE CONFIG
+# DATABASE CONFIG — POSTGRESQL FOR RENDER
 # ---------------------------------------------------------
 
 ENVIRONMENT = os.getenv("ENV", "local")
 
 if ENVIRONMENT == "production":
+    # Use Render PostgreSQL
     DATABASES = {
-        "default": {
-            "ENGINE": "mysql.connector.django",
-            "NAME": os.getenv("DB_NAME"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": "rohitrajvaidya25.mysql.pythonanywhere-services.com",
-            "PORT": "3306",
-        }
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-
 else:
+    # Local SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -107,9 +106,9 @@ AUTH_PASSWORD_VALIDATORS = [
             "UserAttributeSimilarityValidator"
         )
     },
-    {"NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator")},
-    {"NAME": ("django.contrib.auth.password_validation." "CommonPasswordValidator")},
-    {"NAME": ("django.contrib.auth.password_validation." "NumericPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation.MinimumLengthValidator")},
+    {"NAME": ("django.contrib.auth.password_validation.CommonPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation.NumericPasswordValidator")},
 ]
 
 # ---------------------------------------------------------

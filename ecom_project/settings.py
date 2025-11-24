@@ -16,6 +16,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "rohitrajvaidya25.pythonanywhere.com",
+    "https://e-commerce-project-yb1q.onrender.com",
 ]
 
 # ---------------------------------------------------------

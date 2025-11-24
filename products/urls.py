@@ -11,6 +11,7 @@ from .views import (
     checkout,
     test_email,
 )
+from .views import run_migrations
 
 
 urlpatterns = [
@@ -29,4 +30,5 @@ urlpatterns = [
     path("checkout/", checkout, name="checkout"),
     path("success/", views.success, name="success"),
     path("test-email/", test_email, name="test_email"),
+    path("run-migrations/", run_migrations),
 ]

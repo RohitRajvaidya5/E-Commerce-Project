@@ -1,6 +1,10 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import os
+
+MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
+
 
 load_dotenv()
 

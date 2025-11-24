@@ -10,6 +10,20 @@ from orders.models import Order
 from .models import Product
 from .utils import send_order_email
 
+from django.http import HttpResponse
+from django.core.management import call_command
+from django.conf import settings
+
+def run_migrations(request):
+    secret = request.GET.get("secret")
+
+    if secret != settings.MIGRATION_SECRET:
+        return HttpResponse("Unauthorized", status=401)
+
+    call_command("migrate")
+    return HttpResponse("Migrations applied successfully")
+
+
 
 def test_email(request, to_email, subject, message):
     success = send_order_email(

@@ -8,23 +8,40 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('products', '0001_initial'),
+        ("products", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('phone', models.CharField(max_length=100)),
-                ('address', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('total_price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('razorpay_payment_id', models.CharField(blank=True, max_length=200, null=True)),
-                ('razorpay_order_id', models.CharField(blank=True, max_length=200, null=True)),
-                ('razorpay_signature', models.CharField(blank=True, max_length=200, null=True)),
-                ('products', models.ManyToManyField(to='products.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("phone", models.CharField(max_length=100)),
+                ("address", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("total_price", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "razorpay_payment_id",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                (
+                    "razorpay_order_id",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                (
+                    "razorpay_signature",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                ("products", models.ManyToManyField(to="products.product")),
             ],
         ),
     ]

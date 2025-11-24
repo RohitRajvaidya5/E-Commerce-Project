@@ -18,6 +18,4 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=20, default="Pending")
 
     def __str__(self):
-        return (
-            f"Order: {self.name} | {self.total_price} | {self.payment_status}"
-        )
+        return f"Order: {self.name} | {self.total_price} | {self.payment_status}"

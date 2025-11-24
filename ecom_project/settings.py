@@ -95,7 +95,7 @@ else:
         }
     }
 
-DEBUG = ENVIRONMENT != "production"
+DEBUG = True
 
 # ---------------------------------------------------------
 # PASSWORD VALIDATION

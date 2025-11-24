@@ -45,10 +45,7 @@ def search_suggestions(request):
 
     products = Product.objects.filter(name__icontains=query)[:5]
 
-    data = [
-        {"name": p.name, "url": p.get_absolute_url()}
-        for p in products
-    ]
+    data = [{"name": p.name, "url": p.get_absolute_url()} for p in products]
 
     return JsonResponse({"results": data})
 
@@ -111,9 +108,7 @@ def add_to_cart(request, product_id):
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     request.session["cart"] = cart
 
-    is_ajax = (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
     if request.method == "POST" or is_ajax:
         return JsonResponse(
@@ -180,9 +175,7 @@ def update_cart_quantity(request, product_id, quantity):
         product = Product.objects.get(id=product_id)
         new_total = product.price * qty_int
 
-        return JsonResponse(
-            {"qty": qty_int, "total": new_total, "success": True}
-        )
+        return JsonResponse({"qty": qty_int, "total": new_total, "success": True})
 
     return JsonResponse(
         {"success": False, "error": "Invalid method"},

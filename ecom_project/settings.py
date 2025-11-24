@@ -14,7 +14,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")  # optional for manual migration endpoint
+MIGRATION_SECRET = os.getenv(
+    "MIGRATION_SECRET"
+)  # optional for manual migration endpoint
 
 ALLOWED_HOSTS = [
     "127.0.0.1",

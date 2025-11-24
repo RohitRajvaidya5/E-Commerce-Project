@@ -1,5 +1,4 @@
 from pathlib import Path
-from django.contrib.messages import constants as messages
 import os
 from dotenv import load_dotenv
 
@@ -13,15 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-
-
-
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'rohitrajvaidya25.pythonanywhere.com',
+    "127.0.0.1",
+    "localhost",
+    "rohitrajvaidya25.pythonanywhere.com",
 ]
-
 
 # ---------------------------------------------------------
 # APPLICATIONS
@@ -76,22 +71,23 @@ WSGI_APPLICATION = "ecom_project.wsgi.application"
 ENVIRONMENT = os.getenv("ENV", "local")
 
 if ENVIRONMENT == "production":
-    # Use MySQL or PostgreSQL in deployment
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': 'rohitrajvaidya25.mysql.pythonanywhere-services.com',
-            'PORT': '3306',
-            'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": (
+                "rohitrajvaidya25.mysql"
+                ".pythonanywhere-services.com"
+            ),
+            "PORT": "3306",
+            "OPTIONS": {
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
             },
         }
     }
 else:
-    # Use SQLite3 locally
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -99,27 +95,17 @@ else:
         }
     }
 
-
 DEBUG = ENVIRONMENT != "production"
-
 
 # ---------------------------------------------------------
 # PASSWORD VALIDATION
 # ---------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 # ---------------------------------------------------------
@@ -135,15 +121,15 @@ USE_TZ = True
 # STATIC & MEDIA
 # ---------------------------------------------------------
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # ---------------------------------------------------------
 # EMAIL SETTINGS

@@ -1,11 +1,9 @@
 from pathlib import Path
 import os
+
 from dotenv import load_dotenv
-import os
 
-MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
-
-
+# Load environment variables
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -82,7 +81,7 @@ if ENVIRONMENT == "production":
             "NAME": os.getenv("DB_NAME"),
             "USER": os.getenv("DB_USER"),
             "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": ("rohitrajvaidya25.mysql" ".pythonanywhere-services.com"),
+            "HOST": "rohitrajvaidya25.mysql.pythonanywhere-services.com",
             "PORT": "3306",
             "OPTIONS": {
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -105,11 +104,29 @@ DEBUG = ENVIRONMENT != "production"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        )
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        )
+    },
 ]
 
 # ---------------------------------------------------------

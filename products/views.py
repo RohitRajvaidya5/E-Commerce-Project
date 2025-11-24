@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.management import call_command
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -10,9 +11,6 @@ from orders.models import Order
 from .models import Product
 from .utils import send_order_email
 
-from django.http import HttpResponse
-from django.core.management import call_command
-from django.conf import settings
 
 def run_migrations(request):
     secret = request.GET.get("secret")
@@ -24,7 +22,6 @@ def run_migrations(request):
     return HttpResponse("Migrations applied successfully")
 
 
-
 def test_email(request, to_email, subject, message):
     success = send_order_email(
         to_email=to_email,
@@ -33,11 +30,11 @@ def test_email(request, to_email, subject, message):
     )
 
     if success:
-        response_message = "Email sent successfully!"
+        msg = "Email sent successfully!"
     else:
-        response_message = "Failed to send email"
+        msg = "Failed to send email"
 
-    return HttpResponse(response_message)
+    return HttpResponse(msg)
 
 
 def search_suggestions(request):
@@ -48,7 +45,10 @@ def search_suggestions(request):
 
     products = Product.objects.filter(name__icontains=query)[:5]
 
-    data = [{"name": p.name, "url": p.get_absolute_url()} for p in products]
+    data = [
+        {"name": p.name, "url": p.get_absolute_url()}
+        for p in products
+    ]
 
     return JsonResponse({"results": data})
 
@@ -64,15 +64,13 @@ def search_products(request):
     return render(
         request,
         "products/search_results.html",
-        {
-            "query": query,
-            "results": results,
-        },
+        {"query": query, "results": results},
     )
 
 
 def products(request):
     product_list = Product.objects.all()
+
     return render(
         request,
         "products/index.html",
@@ -81,8 +79,8 @@ def products(request):
 
 
 def home(request):
-    profile_list = Profile.objects.all()
     product_list = Product.objects.all()
+    profile_list = Profile.objects.all()
     cart = request.session.get("cart", {})
     cart_items = sum(cart.values())
 
@@ -100,6 +98,7 @@ def home(request):
 @login_required(login_url="login")
 def product_detail(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
+
     return render(
         request,
         "products/detail.html",
@@ -112,7 +111,9 @@ def add_to_cart(request, product_id):
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     request.session["cart"] = cart
 
-    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    is_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
 
     if request.method == "POST" or is_ajax:
         return JsonResponse(
@@ -130,28 +131,26 @@ def remove_from_cart(request, product_id):
     cart = request.session.get("cart", {})
     cart.pop(str(product_id), None)
     request.session["cart"] = cart
+
     return redirect("cart")
 
 
 def cart_view(request):
     cart = request.session.get("cart", {})
-    products = []
+    items = []
     total = 0
 
     for product_id, qty in cart.items():
         product = Product.objects.get(id=product_id)
-        product.total = product.price * qty
         product.qty = qty
-        products.append(product)
+        product.total = product.price * qty
+        items.append(product)
         total += product.total
 
     return render(
         request,
         "products/cart.html",
-        {
-            "products": products,
-            "total": total,
-        },
+        {"products": items, "total": total},
     )
 
 
@@ -160,14 +159,14 @@ def update_cart_quantity(request, product_id, quantity):
         cart = request.session.get("cart", {})
 
         try:
-            quantity_int = int(quantity)
+            qty_int = int(quantity)
         except ValueError:
             return JsonResponse(
                 {"success": False, "error": "Invalid quantity"},
                 status=400,
             )
 
-        quantity_int = max(1, quantity_int)
+        qty_int = max(1, qty_int)
 
         if str(product_id) not in cart:
             return JsonResponse(
@@ -175,18 +174,14 @@ def update_cart_quantity(request, product_id, quantity):
                 status=400,
             )
 
-        cart[str(product_id)] = quantity_int
+        cart[str(product_id)] = qty_int
         request.session["cart"] = cart
 
         product = Product.objects.get(id=product_id)
-        new_total = product.price * quantity_int
+        new_total = product.price * qty_int
 
         return JsonResponse(
-            {
-                "qty": quantity_int,
-                "total": new_total,
-                "success": True,
-            }
+            {"qty": qty_int, "total": new_total, "success": True}
         )
 
     return JsonResponse(
@@ -199,16 +194,15 @@ def update_cart_quantity(request, product_id, quantity):
 def checkout(request):
     profile = Profile.objects.get(user=request.user)
     cart = request.session.get("cart", {})
-    products = []
+    items = []
     subtotal = 0
 
     for product_id, qty in cart.items():
         product = Product.objects.get(id=product_id)
-        item_total = product.price * qty
         product.qty = qty
-        product.item_total = item_total
-        products.append(product)
-        subtotal += item_total
+        product.item_total = product.price * qty
+        items.append(product)
+        subtotal += product.item_total
 
     tax = int(subtotal * 0.10)
     total = subtotal + tax
@@ -216,7 +210,7 @@ def checkout(request):
     client = razorpay.Client(
         auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
     )
-    razorpay_payment_data = None
+    razorpay_data = None
 
     user = request.user
     profile = user.profile
@@ -243,7 +237,7 @@ def checkout(request):
             }
         )
 
-        razorpay_payment_data = {
+        razorpay_data = {
             "key_id": settings.RAZORPAY_KEY_ID,
             "order_id": order["id"],
             "amount": amount,
@@ -251,21 +245,21 @@ def checkout(request):
         }
 
     if request.method == "POST" and "place_order" in request.POST:
-        razorpay_payment_id = request.POST.get("razorpay_payment_id")
-        razorpay_order_id = request.POST.get("razorpay_order_id")
-        razorpay_signature = request.POST.get("razorpay_signature")
+        rp_id = request.POST.get("razorpay_payment_id")
+        rp_order = request.POST.get("razorpay_order_id")
+        rp_sig = request.POST.get("razorpay_signature")
 
         params = {
-            "razorpay_order_id": razorpay_order_id,
-            "razorpay_payment_id": razorpay_payment_id,
-            "razorpay_signature": razorpay_signature,
+            "razorpay_order_id": rp_order,
+            "razorpay_payment_id": rp_id,
+            "razorpay_signature": rp_sig,
         }
 
         try:
             client.utility.verify_payment_signature(params)
-            payment_status = "Success"
+            pay_status = "Success"
         except Exception:
-            payment_status = "Failed"
+            pay_status = "Failed"
 
         order = Order.objects.create(
             name=name,
@@ -273,13 +267,13 @@ def checkout(request):
             email=email,
             address=address,
             total_price=total,
-            razorpay_payment_id=razorpay_payment_id,
-            razorpay_order_id=razorpay_order_id,
-            razorpay_signature=razorpay_signature,
-            payment_status=payment_status,
+            razorpay_payment_id=rp_id,
+            razorpay_order_id=rp_order,
+            razorpay_signature=rp_sig,
+            payment_status=pay_status,
         )
 
-        order.products.set([p.id for p in products])
+        order.products.set([p.id for p in items])
 
         message = (
             f"Thank you {name}! Your order ID is {order.id}\n"
@@ -301,11 +295,11 @@ def checkout(request):
         request,
         "products/checkout.html",
         {
-            "products": products,
+            "products": items,
             "subtotal": subtotal,
             "tax": tax,
             "total": total,
-            "payment": razorpay_payment_data,
+            "payment": razorpay_data,
             "name": name,
             "phone": phone,
             "email": email,

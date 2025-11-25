@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-
 from dotenv import load_dotenv
 import dj_database_url
 
@@ -14,9 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-MIGRATION_SECRET = os.getenv(
-    "MIGRATION_SECRET"
-)  # optional for manual migration endpoint
+MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -36,9 +33,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Your apps
     "products",
     "orders",
     "accounts",
+    # Cloudinary
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 MIDDLEWARE = [
@@ -78,7 +79,6 @@ WSGI_APPLICATION = "ecom_project.wsgi.application"
 ENVIRONMENT = os.getenv("ENV", "local")
 
 if ENVIRONMENT == "production":
-    # Use Render PostgreSQL
     DATABASES = {
         "default": dj_database_url.config(
             default=os.getenv("DATABASE_URL"),
@@ -87,7 +87,6 @@ if ENVIRONMENT == "production":
         )
     }
 else:
-    # Local SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -95,11 +94,7 @@ else:
         }
     }
 
-DEBUG = True
-
-if ENVIRONMENT == "production":
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
+DEBUG = ENVIRONMENT != "production"
 
 # ---------------------------------------------------------
 # PASSWORD VALIDATION
@@ -107,14 +102,11 @@ if ENVIRONMENT == "production":
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {"NAME": ("django.contrib.auth.password_validation.MinimumLengthValidator")},
-    {"NAME": ("django.contrib.auth.password_validation.CommonPasswordValidator")},
-    {"NAME": ("django.contrib.auth.password_validation.NumericPasswordValidator")},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 # ---------------------------------------------------------
@@ -127,23 +119,26 @@ USE_I18N = True
 USE_TZ = True
 
 # ---------------------------------------------------------
-# STATIC & MEDIA
+# STATIC & MEDIA (STATICFILES + CLOUDINARY FIXED)
 # ---------------------------------------------------------
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
-
-INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+# Cloudinary configuration
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
+    "API_KEY": os.getenv("CLOUD_API_KEY"),
+    "API_SECRET": os.getenv("CLOUD_API_SECRET"),
+}
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-
+# Django still needs MEDIA_URL, but Cloudinary stores files, not local disk
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+
+# DO NOT use MEDIA_ROOT with Cloudinary
+# MEDIA_ROOT = BASE_DIR / "media"
 
 # ---------------------------------------------------------
 # EMAIL SETTINGS
@@ -165,7 +160,7 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 # ---------------------------------------------------------
-# DEFAULT FIELD
+# DEFAULT FIELD TYPE
 # ---------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

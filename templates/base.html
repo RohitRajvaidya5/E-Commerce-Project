@@ -26,11 +26,9 @@
       .brand-gradient { background: linear-gradient(90deg,#7c3aed,#06b6d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
       main > .container-inner { padding-top: 8px; padding-bottom: 24px; }
 
-      /* Suggestions */
       #search-suggestions { max-height: 260px; overflow-y: auto; }
       #search-suggestions li.active { background-color: rgba(124,58,237,0.08); color: #5b21b6; }
 
-      /* Dark mode fix */
       html[data-theme="dark"] body,
       html[data-theme="dark"] * {
         color: #ffffff !important;
@@ -41,17 +39,16 @@
   </head>
 
   <body class="bg-base-200 text-base-content min-h-screen">
- {% if messages %}
-<div id="messages">
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-      {{ message }}
+
+    {% if messages %}
+    <div id="messages">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
     </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-
+    {% endif %}
 
     <!-- NAVBAR -->
     <header class="navbar bg-base-100 shadow-sm px-4 md:px-8 sticky top-0 z-50">
@@ -59,9 +56,10 @@
         <a href="/" class="text-2xl font-semibold brand-gradient">Printora</a>
       </div>
 
-      <!-- Search -->
       <div class="flex items-center gap-3">
-        <form action="{% url 'search' %}" method="GET" class="flex items-center">
+
+        <!-- Search (hidden on phones) -->
+        <form action="{% url 'search' %}" method="GET" class="hidden sm:flex items-center">
           <div class="relative flex items-center">
             <input id="search-input" type="text" name="q" placeholder="Search products..."
               class="input input-bordered input-sm search-input pr-3"
@@ -92,46 +90,35 @@
         </label>
 
         <!-- Profile Dropdown -->
-       {% if request.user.is_authenticated %}
-<div class="dropdown dropdown-end">
-  <div class="btn btn-ghost btn-circle avatar" tabindex="0">
-    <div class="w-10 rounded-full">
-      {% if request.user.profile.profile_photo %}
-    <img 
-      src="{{ request.user.profile.profile_photo.url }}" 
-      class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"
-    />
-{% else %}
-    <img 
-      src="/static/default_profile.jpg" 
-      class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"
-    />
-{% endif %}
+        {% if request.user.is_authenticated %}
+        <div class="dropdown dropdown-end">
+          <div class="btn btn-ghost btn-circle avatar" tabindex="0">
+            <div class="w-10 rounded-full">
+              {% if request.user.profile.profile_photo %}
+              <img src="{{ request.user.profile.profile_photo.url }}" class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"/>
+              {% else %}
+              <img src="/static/default_profile.jpg" class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"/>
+              {% endif %}
+            </div>
+          </div>
 
-
-    </div>
-  </div>
-
-  <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-      <li><a href="{% url 'profile' %}">My Profile</a></li>
-      <li><a href="{% url 'logout' %}">Logout</a></li>
-  </ul>
-</div>
-{% else %}
-<a href="{% url 'login' %}" class="btn btn-primary btn-sm">Login</a>
-{% endif %}
-
+          <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li><a href="{% url 'profile' %}">My Profile</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary btn-sm">Login</a>
+        {% endif %}
       </div>
     </header>
 
-    <!-- Page Content -->
     <main class="p-6">
       <div class="mx-auto container-max container-inner">
         {% block content %}{% endblock %}
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer bg-base-300 p-6 mt-12">
       <div class="w-full container-max mx-auto flex justify-between">
         <div>
@@ -187,27 +174,25 @@
           return;
         }
         box.innerHTML = data.results
-          .map((p, i) => `<li><a href="${p.url}" class="block px-3 py-2">${p.name}</a></li>`).join('');
+          .map(p => `<li><a href="${p.url}" class="block px-3 py-2">${p.name}</a></li>`).join('');
         box.classList.remove('hidden');
       }
 
-      input.addEventListener('input', debounce(() => {
+      input && input.addEventListener('input', debounce(() => {
         fetchSuggestions(input.value.trim());
       }, 180));
     </script>
 
     <script>
-  setTimeout(function () {
-    const msgBox = document.getElementById("messages");
-    if (msgBox) {
-      msgBox.style.transition = "opacity 0.5s ease";
-      msgBox.style.opacity = "0";
-
-      setTimeout(() => msgBox.remove(), 500); // fully remove from DOM
-    }
-  }, 1000); // auto-hide after 1 second
-</script>
-
+      setTimeout(function () {
+        const msgBox = document.getElementById("messages");
+        if (msgBox) {
+          msgBox.style.transition = "opacity 0.5s ease";
+          msgBox.style.opacity = "0";
+          setTimeout(() => msgBox.remove(), 500);
+        }
+      }, 1000);
+    </script>
 
   </body>
 </html>

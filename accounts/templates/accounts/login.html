@@ -5,7 +5,14 @@
 
     <h2 class="text-2xl font-bold mb-4">Login</h2>
 
-    <form method="POST">
+    <!-- Loader (invisible by default) -->
+    <div id="loaderBox" class="flex flex-col items-center py-6 invisible">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p class="mt-3 text-base">Logging you in...</p>
+    </div>
+
+    <!-- FORM -->
+    <form id="loginForm" method="POST">
         {% csrf_token %}
 
         <label class="block mb-1 font-medium">Username</label>
@@ -18,7 +25,7 @@
                class="input input-bordered w-full mb-4"
                required>
 
-        <button class="btn btn-primary w-full mt-3">Login</button>
+        <button class="btn btn-primary w-full mt-3" type="submit">Login</button>
     </form>
 
     <p class="mt-3 text-center">
@@ -29,5 +36,16 @@
     </p>
 
 </div>
+
+<!-- JS to show loader on submit -->
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const loader = document.getElementById('loaderBox');
+
+    loginForm.addEventListener('submit', () => {
+        loginForm.classList.add('invisible');     // hide form
+        loader.classList.remove('invisible');     // show loader
+    });
+</script>
 
 {% endblock %}

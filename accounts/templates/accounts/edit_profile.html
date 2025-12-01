@@ -5,7 +5,14 @@
 
   <h2 class="text-xl font-semibold mb-4">Edit Profile</h2>
 
-  <form method="POST" enctype="multipart/form-data">
+  <!-- LOADER (invisible by default) -->
+  <div id="loaderBox" class="flex flex-col items-center py-8 invisible">
+      <span class="loading loading-spinner loading-lg"></span>
+      <p class="mt-3 text-base">Saving your changes...</p>
+  </div>
+
+  <!-- FORM -->
+  <form id="profileForm" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
     <!-- Phone -->
@@ -43,10 +50,21 @@
     >
 
     <!-- Submit -->
-    <button class="btn btn-primary w-full">Save Changes</button>
+    <button class="btn btn-primary w-full" type="submit">Save Changes</button>
 
   </form>
 
 </div>
+
+<!-- SIMPLE JS TO SHOW LOADER -->
+<script>
+  const form = document.getElementById('profileForm');
+  const loader = document.getElementById('loaderBox');
+
+  form.addEventListener('submit', () => {
+    form.classList.add('invisible');     // hide form
+    loader.classList.remove('invisible'); // show loader
+  });
+</script>
 
 {% endblock %}

@@ -33,14 +33,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     # Your apps
     "products",
     "orders",
-    "accounts",
+    "accounts.apps.AccountsConfig",
+
     # Cloudinary
     "cloudinary",
     "cloudinary_storage",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -169,3 +172,9 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+
+SESSION_COOKIE_AGE = 15 * 60        # 15 minutes
+SESSION_SAVE_EVERY_REQUEST = True   # refresh timer on each request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+

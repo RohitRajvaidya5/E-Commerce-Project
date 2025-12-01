@@ -54,9 +54,9 @@
             />
           </div>
 
+          <!-- EMAIL -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-            
             <input
               id="email"
               name="email"
@@ -90,7 +90,8 @@
             </h3>
 
             {% if payment %}
-            <button id="rzp-button" type="button" class="w-full btn btn-primary py-3 text-lg font-semibold">
+            <button id="rzp-button" type="button"
+                    class="w-full btn btn-primary py-3 text-lg font-semibold">
               Pay ₹{{ total }}
             </button>
 
@@ -98,11 +99,10 @@
 
             {% else %}
             <div class="bg-base-200 rounded-lg p-4 border border-base-300">
-  <p class="text-base-content text-sm">
-    Enter your details and click "Proceed to Payment" to generate payment order.
-  </p>
-</div>
-
+              <p class="text-base-content text-sm">
+                Enter your details and click "Proceed to Payment" to generate payment order.
+              </p>
+            </div>
             {% endif %}
           </div>
 
@@ -111,8 +111,7 @@
             <button
               type="submit"
               name="create_payment"
-              class="w-full btn btn-primary py-3 text-lg font-semibold"
-            >
+              class="w-full btn btn-primary py-3 text-lg font-semibold">
               Proceed to Payment
             </button>
           </div>
@@ -125,11 +124,9 @@
     <!-- Right Sidebar -->
     <div class="md:col-span-1">
       <div class="bg-base-100 rounded-xl shadow-sm p-6 sticky top-24">
-
         <h3 class="text-lg font-bold mb-4">Order Summary</h3>
 
         <div class="space-y-3 pb-4 border-b border-gray-200">
-
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">Subtotal</span>
             <span class="font-semibold">₹{{ subtotal }}</span>
@@ -146,7 +143,6 @@
             <span class="text-gray-600">Tax</span>
             <span class="font-semibold">₹{{ tax }}</span>
           </div>
-
         </div>
 
         <div class="flex justify-between items-center mt-4">
@@ -155,7 +151,6 @@
         </div>
 
         <a href="{% url 'cart' %}" class="w-full mt-6 btn btn-ghost gap-2">← Back to Cart</a>
-
       </div>
     </div>
 
@@ -164,6 +159,8 @@
 
 {% if payment %}
 <script>
+  const loader = document.getElementById("global-loader");
+  const loaderText = document.getElementById("global-loader-text");
 
   var options = {
       "key": "{{ payment.key_id }}",
@@ -174,9 +171,13 @@
 
       "handler": function (response) {
 
+          window._razorpay_processing = true;
+
+          loaderText.textContent = "Processing payment...";
+          loader.classList.remove("invisible");
+
           let form = document.getElementById("checkout-form");
 
-          // Add Razorpay data
           let fields = {
               "razorpay_payment_id": response.razorpay_payment_id,
               "razorpay_order_id": response.razorpay_order_id,
@@ -192,7 +193,9 @@
               form.appendChild(input);
           }
 
-          form.submit();
+          setTimeout(() => {
+              form.submit();
+          }, 300);
       },
 
       "theme": {"color": "#0D6EFD"}
@@ -201,11 +204,20 @@
   var rzp1 = new Razorpay(options);
 
   document.getElementById('rzp-button').onclick = function(e){
-      rzp1.open();
-      e.preventDefault();
-  }
 
+      e.preventDefault();
+
+      loaderText.textContent = "Preparing payment...";
+      loader.classList.remove("invisible");
+
+      setTimeout(() => {
+          loader.classList.add("invisible"); 
+          rzp1.open();
+      }, 800);
+  }
 </script>
+
+
 {% endif %}
 
 {% endblock %}

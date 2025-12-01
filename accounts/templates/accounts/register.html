@@ -11,16 +11,21 @@
     Join us and start your journey with Printora.
   </p>
 
-  <form method="POST" class="space-y-5">
+  <!-- Loader (invisible by default) -->
+  <div id="loaderBox" class="flex flex-col items-center mt-4 invisible">
+      <span class="loading loading-spinner loading-lg"></span>
+      <p class="mt-3 text-base">Creating your account...</p>
+  </div>
+
+  <!-- Form -->
+  <form id="registerForm" method="POST" class="space-y-5">
     {% csrf_token %}
 
-    <!-- Form Fields -->
     <div class="space-y-4 form-control">
       {{ form.as_p }}
     </div>
 
-    <!-- Submit Button -->
-    <button class="btn btn-primary w-full text-base font-semibold">
+    <button class="btn btn-primary w-full text-base font-semibold" type="submit">
       Create Account
     </button>
   </form>
@@ -37,5 +42,16 @@
   </p>
 
 </div>
+
+<!-- Loader Script -->
+<script>
+  const registerForm = document.getElementById("registerForm");
+  const loader = document.getElementById("loaderBox");
+
+  registerForm.addEventListener("submit", () => {
+      registerForm.classList.add("invisible");      // hide form
+      loader.classList.remove("invisible");         // show loader
+  });
+</script>
 
 {% endblock %}

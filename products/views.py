@@ -268,21 +268,25 @@ def checkout(request):
 
         order.products.set([p.id for p in items])
 
-        message = (
-            f"Thank you {name}! Your order ID is {order.id}\n"
-            f"Payment Amount: {order.total_price}\n"
-            f"Payment Status: {order.payment_status}"
-        )
+        # ✔ Store total + order id for success page
+        request.session["last_order_total"] = total
+        request.session["last_order_id"] = order.id
 
+        # email
         send_order_email(
             to_email=email,
             subject="Order Confirmation",
-            message=message,
+            message=(
+                f"Thank you {name}! Your order ID is {order.id}\n"
+                f"Payment Amount: {order.total_price}\n"
+                f"Payment Status: {order.payment_status}"
+            ),
         )
 
         request.session["cart"] = {}
 
         return redirect("success")
+
 
     return render(
         request,
@@ -303,4 +307,14 @@ def checkout(request):
 
 
 def success(request):
-    return render(request, "products/success.html")
+    total = request.session.get("last_order_total")
+    order_id = request.session.get("last_order_id")
+
+    # optional: clear them so refresh doesn’t reuse
+    request.session.pop("last_order_total", None)
+    request.session.pop("last_order_id", None)
+
+    return render(request, "products/success.html", {
+        "total": total,
+        "order_id": order_id,
+    })

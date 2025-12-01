@@ -6,8 +6,27 @@
     <h2 class="text-2xl font-bold mb-4">Logged Out</h2>
     <p>You have been logged out successfully.</p>
 
-    <a href="{% url 'login' %}" class="btn btn-primary mt-4">Login Again</a>
+    <!-- Loader (invisible by default) -->
+    <div id="loaderBox" class="flex flex-col items-center mt-6 invisible">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p class="mt-3 text-base">Redirecting...</p>
+    </div>
+
+    <!-- Button -->
+    <a id="loginBtn" href="{% url 'login' %}" class="btn btn-primary mt-4">
+        Login Again
+    </a>
 
 </div>
+
+<script>
+    const btn = document.getElementById("loginBtn");
+    const loader = document.getElementById("loaderBox");
+
+    btn.addEventListener("click", () => {
+        btn.classList.add("invisible");       // hide button
+        loader.classList.remove("invisible"); // show loader
+    });
+</script>
 
 {% endblock %}

@@ -1,16 +1,11 @@
-
-
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Products{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
 
 <div class="max-w-7xl mx-auto px-4 py-10">
-
-    <!-- Product Title -->
-<!--    <h1 class="text-3xl font-semibold mb-6">Product Details</h1>-->
 
     <!-- PRODUCT SECTION -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -18,12 +13,12 @@
         <!-- LEFT: Images -->
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-            <img
-                src="{{ product.image.url }}"
-                class="w-full h-80 object-contain rounded-lg shadow"
-            />
-        </div>
+                <div class="md:col-span-2">
+                    <img
+                        src="{{ product.image.url }}"
+                        class="w-full h-80 object-contain rounded-lg shadow-md bg-white"
+                    />
+                </div>
             </div>
         </div>
 
@@ -50,11 +45,19 @@
             <!-- Buttons -->
             <div class="space-y-3 pt-4">
 
-                <button id="add-to-cart-btn" class="cursor-pointer w-full bg-black text-white py-3 rounded-lg" type="button" onclick="addToCartAjax({{ product.id }})">
+                <!-- AJAX Add to Cart -->
+                <button id="add-to-cart-btn"
+                        class="cursor-pointer w-full bg-black text-white py-3 rounded-lg"
+                        type="button"
+                        onclick="addToCartAjax({{ product.id }})">
                     Add To Cart
                 </button>
 
-                <a href="{% url 'cart' %}" class="w-full block text-center border py-3 rounded-lg">Go To Cart</a>
+                <!-- Go to Cart (Loader Enabled) -->
+                <a href="{% url 'cart' %}"
+                   class="w-full block text-center border py-3 rounded-lg link-with-loader">
+                    Go To Cart
+                </a>
             </div>
 
             <div class="pt-3 space-y-1 text-sm">
@@ -76,26 +79,6 @@
         </p>
     </div>
 
-    <!-- REVIEWS SECTION -->
-<!--    <div class="mt-20">-->
-<!--        <h2 class="text-2xl font-semibold mb-6">Customer Reviews</h2>-->
-
-<!--        <div class="flex flex-col md:flex-row md:gap-20 gap-10">-->
-
-<!--            &lt;!&ndash; Left: Ratings &ndash;&gt;-->
-<!--            <div>-->
-<!--                <p class="text-green-600 font-semibold text-lg">⭐ 5.00 out of 5</p>-->
-<!--                <p class="text-gray-600 text-sm">Based on 1 review</p>-->
-<!--            </div>-->
-
-<!--            &lt;!&ndash; Right: Button &ndash;&gt;-->
-<!--            <button class="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50">-->
-<!--                Write a review-->
-<!--            </button>-->
-
-<!--        </div>-->
-<!--    </div>-->
-
 </div>
 
 <script>
@@ -103,6 +86,7 @@ async function addToCartAjax(productId) {
     const btn = document.getElementById('add-to-cart-btn');
     if (!btn) return;
     const orig = btn.innerText;
+
     try {
         btn.disabled = true;
         btn.innerText = 'Adding...';
@@ -113,16 +97,17 @@ async function addToCartAjax(productId) {
         });
 
         if (resp.ok) {
-            // increment navbar badge if present
+            /* Update Cart Badge */
             const badge = document.getElementById('cart-badge');
             if (badge) {
-                const cur = parseInt(badge.innerText) || 0;
-                badge.innerText = cur + 1;
+                const current = parseInt(badge.innerText) || 0;
+                badge.innerText = current + 1;
             }
 
             btn.innerText = '✓ Added';
             btn.classList.remove('bg-black');
             btn.classList.add('bg-green-600');
+
             setTimeout(() => {
                 btn.innerText = orig;
                 btn.classList.remove('bg-green-600');
@@ -133,6 +118,7 @@ async function addToCartAjax(productId) {
             btn.innerText = 'Error';
             setTimeout(() => { btn.innerText = orig; btn.disabled = false; }, 1500);
         }
+
     } catch (err) {
         console.error(err);
         btn.innerText = 'Error';
@@ -146,7 +132,7 @@ function getCookie(name) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === name + '=') {
+            if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }

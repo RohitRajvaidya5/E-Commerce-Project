@@ -5,33 +5,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- DaisyUI v5 + Themes -->
+    <!-- DaisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" />
-
-    <!-- Tailwind v4 Browser -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <!-- DaisyUI Core -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" />
 
+    <!-- Tailwind Browser -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
     <style>
-      :root { --content-max: 1100px; }
-      html, body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
-      .container-max { max-width: var(--content-max); }
-      .btn, .input, .link { transition: all .12s ease-in-out; }
-      header.navbar { backdrop-filter: blur(6px); }
-      .brand-gradient { background: linear-gradient(90deg,#7c3aed,#06b6d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      main > .container-inner { padding-top: 8px; padding-bottom: 24px; }
-
-      #search-suggestions { max-height: 260px; overflow-y: auto; }
-      #search-suggestions li.active { background-color: rgba(124,58,237,0.08); color: #5b21b6; }
-
-      html[data-theme="dark"] body,
-      html[data-theme="dark"] * {
-        color: #ffffff !important;
+      :root {
+        --content-max: 1100px;
+      }
+      html, body {
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      .container-max {
+        max-width: var(--content-max);
+      }
+      header.navbar {
+        backdrop-filter: blur(6px);
+      }
+      .brand-gradient {
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      main > .container-inner {
+        padding-top: 8px;
+        padding-bottom: 24px;
+      }
+      html[data-theme="dark"] *, html[data-theme="dark"] body {
+        color: #fff !important;
       }
     </style>
 
@@ -40,12 +47,30 @@
 
   <body class="bg-base-200 text-base-content min-h-screen">
 
+    <!-- GLOBAL LOADER -->
+    <div id="global-loader"
+         class="fixed inset-0 bg-base-200 bg-opacity-80 flex items-center justify-center invisible z-[9999]">
+      <div class="bg-base-100 p-8 rounded-xl shadow-lg border border-base-300 flex flex-col items-center">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p id="global-loader-text" class="mt-4 text-sm font-medium text-base-content">Processing...</p>
+      </div>
+    </div>
+
+    <script>
+      // Only show loader for normal form submits (not Razorpay)
+      window._razorpay_processing = false;
+
+      document.addEventListener("submit", function () {
+        if (window._razorpay_processing) return;
+
+        document.getElementById("global-loader").classList.remove("invisible");
+      });
+    </script>
+
     {% if messages %}
     <div id="messages">
       {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-          {{ message }}
-        </div>
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
       {% endfor %}
     </div>
     {% endif %}
@@ -58,50 +83,42 @@
 
       <div class="flex items-center gap-3">
 
-        <!-- Search (hidden on phones) -->
+        <!-- Search -->
         <form action="{% url 'search' %}" method="GET" class="hidden sm:flex items-center">
-          <div class="relative flex items-center">
-            <input id="search-input" type="text" name="q" placeholder="Search products..."
-              class="input input-bordered input-sm search-input pr-3"
-              value="{{ request.GET.q }}" autocomplete="off" />
-            <button type="submit" class="ml-2 btn btn-square btn-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
-              </svg>
-            </button>
-            <ul id="search-suggestions" class="hidden absolute left-0 right-0 mt-2 z-50 bg-base-100 rounded-box shadow p-1"></ul>
-          </div>
+          <input id="search-input" type="text" name="q"
+                 placeholder="Search products..." autocomplete="off"
+                 value="{{ request.GET.q }}"
+                 class="input input-bordered input-sm pr-3" />
+
+          <button type="submit" class="ml-2 btn btn-square btn-sm">🔍</button>
+          <ul id="search-suggestions" class="hidden absolute mt-2 left-0 right-0 bg-base-100 rounded-box shadow p-1"></ul>
         </form>
 
         <!-- Cart -->
         <a href="{% url 'cart' %}" class="btn btn-ghost btn-circle">
           <div class="indicator">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7.5M7 13l1.5 7.5M10 21a1 1 0 11-2 0 1 1 0 012 0zm8 0a1 1 0 11-2 0 1 1 0 012 0z" />
-            </svg>
+            🛒
             <span class="badge badge-sm indicator-item" id="cart-badge">{{ cart_items }}</span>
           </div>
         </a>
 
-        <!-- Theme Toggle -->
+        <!-- Theme -->
         <label class="swap swap-rotate mr-4">
           <input type="checkbox" id="theme-toggle" class="toggle" />
         </label>
 
-        <!-- Profile Dropdown -->
+        <!-- Profile -->
         {% if request.user.is_authenticated %}
         <div class="dropdown dropdown-end">
-          <div class="btn btn-ghost btn-circle avatar" tabindex="0">
+          <div class="avatar btn btn-ghost btn-circle" tabindex="0">
             <div class="w-10 rounded-full">
               {% if request.user.profile.profile_photo %}
-              <img src="{{ request.user.profile.profile_photo.url }}" class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"/>
+                <img src="{{ request.user.profile.profile_photo.url }}" class="w-10 h-10 object-cover rounded-full" />
               {% else %}
-              <img src="/static/default_profile.jpg" class="w-10 h-10 rounded-full object-cover border border-base-300 shadow-sm"/>
+                <img src="/static/default_profile.jpg" class="w-10 h-10 object-cover rounded-full" />
               {% endif %}
             </div>
           </div>
-
           <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             <li><a href="{% url 'profile' %}">My Profile</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -114,17 +131,18 @@
     </header>
 
     <main class="p-6">
-      <div class="mx-auto container-max container-inner">
+      <div class="container-max container-inner mx-auto">
         {% block content %}{% endblock %}
       </div>
     </main>
 
     <footer class="footer bg-base-300 p-6 mt-12">
-      <div class="w-full container-max mx-auto flex justify-between">
+      <div class="container-max mx-auto flex justify-between">
         <div>
           <p class="font-semibold">Printora</p>
           <p class="text-sm mt-1">© 2025 MyShop — All rights reserved.</p>
         </div>
+
         <nav class="flex gap-4">
           <a class="link link-hover">Privacy Policy</a>
           <a class="link link-hover">Terms of Use</a>
@@ -135,61 +153,71 @@
     <!-- Theme Script -->
     <script>
       const toggle = document.getElementById("theme-toggle");
-      const html = document.documentElement;
-      const saved = localStorage.getItem("theme");
-      if (saved) {
-        html.setAttribute("data-theme", saved);
-        toggle.checked = saved === "dark";
+      const htmlEl = document.documentElement;
+      const savedTheme = localStorage.getItem("theme");
+
+      if (savedTheme) {
+        htmlEl.setAttribute("data-theme", savedTheme);
+        toggle.checked = savedTheme === "dark";
       }
+
       toggle.addEventListener("change", () => {
-        const theme = toggle.checked ? "dark" : "light";
-        html.setAttribute("data-theme", theme);
-        localStorage.setItem("theme", theme);
+        const newTheme = toggle.checked ? "dark" : "light";
+        htmlEl.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
       });
     </script>
 
-    <!-- Search Suggestions Script -->
+    <!-- Search Suggestions -->
     <script>
-      const input = document.getElementById("search-input");
-      const box = document.getElementById("search-suggestions");
+      const searchBox = document.getElementById("search-suggestions");
+      const searchInput = document.getElementById("search-input");
 
-      function debounce(fn, wait) {
-        let t;
+      function debounce(fn, delay) {
+        let timeout;
         return (...args) => {
-          clearTimeout(t);
-          t = setTimeout(() => fn.apply(this, args), wait);
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn.apply(this, args), delay);
         };
       }
 
-      async function fetchSuggestions(query) {
+      async function loadSuggestions(query) {
         if (!query) {
-          box.classList.add('hidden');
-          box.innerHTML = '';
+          searchBox.classList.add("hidden");
+          searchBox.innerHTML = "";
           return;
         }
-        const response = await fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
+
+        const res = await fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
         if (!data.results.length) {
-          box.classList.add('hidden');
+          searchBox.classList.add("hidden");
           return;
         }
-        box.innerHTML = data.results
-          .map(p => `<li><a href="${p.url}" class="block px-3 py-2">${p.name}</a></li>`).join('');
-        box.classList.remove('hidden');
+
+        searchBox.innerHTML = data.results
+          .map(p => `<li><a class="block px-3 py-2" href="${p.url}">${p.name}</a></li>`)
+          .join("");
+
+        searchBox.classList.remove("hidden");
       }
 
-      input && input.addEventListener('input', debounce(() => {
-        fetchSuggestions(input.value.trim());
-      }, 180));
+      if (searchInput) {
+        searchInput.addEventListener("input", debounce(() => {
+          loadSuggestions(searchInput.value.trim());
+        }, 200));
+      }
     </script>
 
+    <!-- Flash Message Fade -->
     <script>
-      setTimeout(function () {
-        const msgBox = document.getElementById("messages");
-        if (msgBox) {
-          msgBox.style.transition = "opacity 0.5s ease";
-          msgBox.style.opacity = "0";
-          setTimeout(() => msgBox.remove(), 500);
+      setTimeout(() => {
+        const box = document.getElementById("messages");
+        if (box) {
+          box.style.transition = "opacity .5s";
+          box.style.opacity = "0";
+          setTimeout(() => box.remove(), 500);
         }
       }, 1000);
     </script>

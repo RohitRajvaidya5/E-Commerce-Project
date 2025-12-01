@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import ProfileUpdateForm
+from .models import Profile
 
 
 # -----------------------------
@@ -14,6 +15,9 @@ def register_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Auto-create profile for newly registered users
+            Profile.objects.get_or_create(user=user)
 
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password1")
@@ -30,19 +34,15 @@ def register_user(request):
     else:
         form = UserCreationForm()
 
-    return render(
-        request,
-        "accounts/register.html",
-        {"form": form},
-    )
+    return render(request, "accounts/register.html", {"form": form})
 
 
 # -----------------------------
-# EDIT PROFILE
+# EDIT PROFILE PAGE
 # -----------------------------
 @login_required
 def edit_profile(request):
-    profile = request.user.profile
+    profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         profile.phone = request.POST.get("phone")
@@ -56,11 +56,7 @@ def edit_profile(request):
         messages.success(request, "Profile updated successfully.")
         return redirect("profile")
 
-    return render(
-        request,
-        "accounts/edit_profile.html",
-        {"profile": profile},
-    )
+    return render(request, "accounts/edit_profile.html", {"profile": profile})
 
 
 # -----------------------------
@@ -68,7 +64,7 @@ def edit_profile(request):
 # -----------------------------
 @login_required
 def profile(request):
-    profile = request.user.profile
+    profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         form = ProfileUpdateForm(
@@ -101,14 +97,14 @@ def login_user(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password,
-        )
+        user = authenticate(request, username=username, password=password)
 
         if user:
             login(request, user)
+
+            # Make sure profile exists even for old accounts
+            Profile.objects.get_or_create(user=user)
+
             messages.success(request, "Login successful.")
             return redirect(request.GET.get("next", "products"))
 
@@ -124,3 +120,5 @@ def logout_user(request):
     logout(request)
     messages.success(request, "You have been logged out.")
     return redirect("products")
+
+

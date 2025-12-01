@@ -287,7 +287,6 @@ def checkout(request):
 
         return redirect("success")
 
-
     return render(
         request,
         "products/checkout.html",
@@ -314,7 +313,11 @@ def success(request):
     request.session.pop("last_order_total", None)
     request.session.pop("last_order_id", None)
 
-    return render(request, "products/success.html", {
-        "total": total,
-        "order_id": order_id,
-    })
+    return render(
+        request,
+        "products/success.html",
+        {
+            "total": total,
+            "order_id": order_id,
+        },
+    )

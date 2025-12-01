@@ -177,4 +177,3 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 SESSION_COOKIE_AGE = 15 * 60        # 15 minutes
 SESSION_SAVE_EVERY_REQUEST = True   # refresh timer on each request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-

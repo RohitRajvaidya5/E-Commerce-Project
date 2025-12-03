@@ -16,9 +16,6 @@ def register_user(request):
         if form.is_valid():
             user = form.save()
 
-            # Auto-create profile for newly registered users
-            Profile.objects.get_or_create(user=user)
-
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password1")
 

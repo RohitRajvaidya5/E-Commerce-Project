@@ -16,17 +16,3 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
-
-
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    """Create Profile automatically when a new User is created."""
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
-    """Save Profile whenever the User is saved."""
-    if hasattr(instance, "profile"):
-        instance.profile.save()

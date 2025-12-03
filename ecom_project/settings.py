@@ -136,7 +136,17 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": os.getenv("CLOUD_API_SECRET"),
 }
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Django still needs MEDIA_URL, but Cloudinary stores files, not local disk
 MEDIA_URL = "/"

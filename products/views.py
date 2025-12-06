@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+import logging
 
 import razorpay
 
@@ -10,6 +11,8 @@ from accounts.models import Profile
 from orders.models import Order
 from .models import Product
 from .utils import send_order_email
+
+logger = logging.getLogger(__name__)
 
 
 def run_migrations(request):
@@ -187,15 +190,21 @@ def update_cart_quantity(request, product_id, quantity):
 def checkout(request):
     profile = Profile.objects.get(user=request.user)
     cart = request.session.get("cart", {})
+    
+    # Rebuild items from cart
     items = []
     subtotal = 0
 
     for product_id, qty in cart.items():
-        product = Product.objects.get(id=product_id)
-        product.qty = qty
-        product.item_total = product.price * qty
-        items.append(product)
-        subtotal += product.item_total
+        try:
+            product = Product.objects.get(id=product_id)
+            product.qty = qty
+            product.item_total = product.price * qty
+            items.append(product)
+            subtotal += product.item_total
+        except Product.DoesNotExist:
+            logger.warning(f"Product {product_id} not found in cart")
+            continue
 
     tax = int(subtotal * 0.10)
     total = subtotal + tax
@@ -220,22 +229,27 @@ def checkout(request):
         address = request.POST.get("address", address)
 
     if request.method == "POST" and "create_payment" in request.POST:
-        amount = int(total * 100)
+        try:
+            amount = int(total * 100)
 
-        order = client.order.create(
-            {
+            order = client.order.create(
+                {
+                    "amount": amount,
+                    "currency": "INR",
+                    "payment_capture": 1,
+                }
+            )
+
+            razorpay_data = {
+                "key_id": settings.RAZORPAY_KEY_ID,
+                "order_id": order["id"],
                 "amount": amount,
                 "currency": "INR",
-                "payment_capture": 1,
             }
-        )
-
-        razorpay_data = {
-            "key_id": settings.RAZORPAY_KEY_ID,
-            "order_id": order["id"],
-            "amount": amount,
-            "currency": "INR",
-        }
+            logger.info(f"Razorpay order created: {order['id']}")
+        except Exception as e:
+            logger.error(f"Error creating Razorpay order: {str(e)}")
+            razorpay_data = None
 
     if request.method == "POST" and "place_order" in request.POST:
         rp_id = request.POST.get("razorpay_payment_id")
@@ -248,44 +262,85 @@ def checkout(request):
             "razorpay_signature": rp_sig,
         }
 
+        pay_status = "Failed"
+        
         try:
             client.utility.verify_payment_signature(params)
             pay_status = "Success"
-        except Exception:
+            logger.info(f"Payment verified successfully: {rp_id}")
+        except Exception as e:
+            logger.error(f"Payment verification failed: {str(e)}")
             pay_status = "Failed"
 
-        order = Order.objects.create(
-            name=name,
-            phone=phone,
-            email=email,
-            address=address,
-            total_price=total,
-            razorpay_payment_id=rp_id,
-            razorpay_order_id=rp_order,
-            razorpay_signature=rp_sig,
-            payment_status=pay_status,
-        )
+        try:
+            # Rebuild items in case session was lost
+            cart = request.session.get("cart", {})
+            items = []
+            subtotal = 0
 
-        order.products.set([p.id for p in items])
+            for product_id, qty in cart.items():
+                try:
+                    product = Product.objects.get(id=product_id)
+                    product.qty = qty
+                    product.item_total = product.price * qty
+                    items.append(product)
+                    subtotal += product.item_total
+                except Product.DoesNotExist:
+                    logger.warning(f"Product {product_id} not found during order creation")
+                    continue
 
-        # ✔ Store total + order id for success page
-        request.session["last_order_total"] = total
-        request.session["last_order_id"] = order.id
+            tax = int(subtotal * 0.10)
+            total = subtotal + tax
 
-        # email
-        send_order_email(
-            to_email=email,
-            subject="Order Confirmation",
-            message=(
-                f"Thank you {name}! Your order ID is {order.id}\n"
-                f"Payment Amount: {order.total_price}\n"
-                f"Payment Status: {order.payment_status}"
-            ),
-        )
+            order = Order.objects.create(
+                name=name,
+                phone=phone,
+                email=email,
+                address=address,
+                total_price=total,
+                razorpay_payment_id=rp_id,
+                razorpay_order_id=rp_order,
+                razorpay_signature=rp_sig,
+                payment_status=pay_status,
+            )
 
-        request.session["cart"] = {}
+            order.products.set([p.id for p in items])
 
-        return redirect("success")
+            # Store total + order id for success page
+            request.session["last_order_total"] = float(total)
+            request.session["last_order_id"] = order.id
+
+            logger.info(f"Order created: {order.id} with status: {pay_status}")
+
+            # Send email
+            try:
+                send_order_email(
+                    to_email=email,
+                    subject="Order Confirmation",
+                    message=(
+                        f"Thank you {name}! Your order ID is {order.id}\n"
+                        f"Payment Amount: {order.total_price}\n"
+                        f"Payment Status: {order.payment_status}"
+                    ),
+                )
+            except Exception as e:
+                logger.error(f"Failed to send order email: {str(e)}")
+
+            # Clear cart
+            request.session["cart"] = {}
+            request.session.modified = True
+
+            return redirect("success")
+
+        except Exception as e:
+            logger.error(f"Error creating order: {str(e)}", exc_info=True)
+            # Return a more informative error response
+            return render(
+                request,
+                "products/checkout_error.html",
+                {"error": "An error occurred while processing your order. Please contact support."},
+                status=500,
+            )
 
     return render(
         request,

@@ -182,6 +182,34 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 
-SESSION_COOKIE_AGE = 15 * 60  # 15 minutes
+SESSION_COOKIE_AGE = 30 * 60  # 30 minutes (increased from 15 for payment flow)
 SESSION_SAVE_EVERY_REQUEST = True  # refresh timer on each request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# ---------------------------------------------------------
+# LOGGING
+# ---------------------------------------------------------
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "products.views": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

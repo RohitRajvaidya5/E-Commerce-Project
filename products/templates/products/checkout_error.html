@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-lg mx-auto mt-20 bg-base-100 p-10 rounded-2xl shadow-xl border border-base-300 text-center">
+
+    <!-- ERROR ICON -->
+    <div class="flex justify-center mb-4">
+        <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-10 h-10 text-red-600"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4v2m0 4v2"/>
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- HEADING -->
+    <h1 class="text-3xl font-extrabold text-red-600 mb-3">
+        Payment Error
+    </h1>
+
+    <p class="text-base-content/70 mb-6 text-sm">
+        {{ error }}
+    </p>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex gap-3">
+        <a href="{% url 'checkout' %}" class="btn btn-primary btn-outline flex-1">
+            Try Again
+        </a>
+        <a href="{% url 'products' %}" class="btn btn-ghost flex-1">
+            Continue Shopping
+        </a>
+    </div>
+</div>
+
+{% endblock %}

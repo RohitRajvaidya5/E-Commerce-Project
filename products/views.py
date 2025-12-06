@@ -190,7 +190,7 @@ def update_cart_quantity(request, product_id, quantity):
 def checkout(request):
     profile = Profile.objects.get(user=request.user)
     cart = request.session.get("cart", {})
-    
+
     # Rebuild items from cart
     items = []
     subtotal = 0
@@ -263,7 +263,7 @@ def checkout(request):
         }
 
         pay_status = "Failed"
-        
+
         try:
             client.utility.verify_payment_signature(params)
             pay_status = "Success"
@@ -286,7 +286,9 @@ def checkout(request):
                     items.append(product)
                     subtotal += product.item_total
                 except Product.DoesNotExist:
-                    logger.warning(f"Product {product_id} not found during order creation")
+                    logger.warning(
+                        f"Product {product_id} not found during order creation"
+                    )
                     continue
 
             tax = int(subtotal * 0.10)
@@ -338,7 +340,9 @@ def checkout(request):
             return render(
                 request,
                 "products/checkout_error.html",
-                {"error": "An error occurred while processing your order. Please contact support."},
+                {
+                    "error": "An error occurred while processing your order. Please contact support."
+                },
                 status=500,
             )
 

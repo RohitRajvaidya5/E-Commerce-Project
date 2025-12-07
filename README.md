@@ -2,6 +2,13 @@
 
 **E‑Commerce Project** — a full‑stack Django e‑commerce web app with product listing, cart, checkout, and payment via Razorpay — built with Django, TailwindCSS & DaisyUI.
 
+---
+
+![e-commerce project](/assets/screenshot.png)
+
+
+---
+
 **Live at:** `https://e‑commerce‑project‑yb1q.onrender.com/`  
 **Repository:** https://github.com/RohitRajvaidya5/E‑Commerce‑Project
 

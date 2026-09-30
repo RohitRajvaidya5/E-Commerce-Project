@@ -12,8 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY SETTINGS
 # ---------------------------------------------------------
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-MIGRATION_SECRET = os.getenv("MIGRATION_SECRET")
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-for-local-use-only")
+MIGRATION_SECRET = os.getenv("MIGRATION_SECRET", "dev-migration-secret-for-local-use-only")
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -136,23 +136,27 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": os.getenv("CLOUD_API_SECRET"),
 }
 
-# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
-
-# Django still needs MEDIA_URL, but Cloudinary stores files, not local disk
-MEDIA_URL = "/"
-
-# DO NOT use MEDIA_ROOT with Cloudinary
-# MEDIA_ROOT = BASE_DIR / "media"
+if all(CLOUDINARY_STORAGE.values()):
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = "/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 # ---------------------------------------------------------
 # EMAIL SETTINGS
